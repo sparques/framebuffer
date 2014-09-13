@@ -27,7 +27,7 @@ func (i *BGR565) At(x, y int) color.Color {
 
 	return RGBColor{
 		uint8(clr) & mask5,
-		uint8(clr>>6) & mask6,
+		uint8(clr>>5) & mask6,
 		uint8(clr>>11) & mask5,
 	}
 }
@@ -43,10 +43,10 @@ func (i *BGR565) SetRGB(x, y int, c RGBColor) {
 
 	n := i.PixOffset(x, y)
 	pix := i.Pix[n:]
-	clr := uint16(c.G<<11) | uint16(c.G<<6) | uint16(c.R)
+	clr := (uint16(c.G)<<11) | (uint16(c.G)<<5) | uint16(c.R)
 
-	pix[0] = uint8(clr >> 8)
-	pix[1] = uint8(clr)
+	pix[0] = uint8(clr)
+	pix[1] = uint8(clr >> 8)
 }
 
 func (i *BGR565) PixOffset(x, y int) int {

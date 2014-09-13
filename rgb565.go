@@ -16,9 +16,9 @@ var RGB565Model = color.ModelFunc(
 
 		r, g, b, _ := c.RGBA()
 		return RGBColor{
-			uint8(r>>8) & mask5,
-			uint8(g>>8) & mask6,
-			uint8(b>>8) & mask5,
+			uint8(r >> (8 + (8 - 5))),
+			uint8(g >> (8 + (8 - 6))),
+			uint8(b >> (8 + (8 - 5))),
 		}
 	})
 
@@ -41,7 +41,7 @@ func (i *RGB565) At(x, y int) color.Color {
 
 	return RGBColor{
 		uint8(clr>>11) & mask5,
-		uint8(clr>>6) & mask6,
+		uint8(clr>>5) & mask6,
 		uint8(clr) & mask5,
 	}
 }
@@ -57,10 +57,10 @@ func (i *RGB565) SetRGB(x, y int, c RGBColor) {
 
 	n := i.PixOffset(x, y)
 	pix := i.Pix[n:]
-	clr := uint16(c.R<<11) | uint16(c.G<<6) | uint16(c.B)
+	clr := (uint16(c.R) << 11) | (uint16(c.G) << 5) | uint16(c.B)
 
-	pix[0] = uint8(clr >> 8)
-	pix[1] = uint8(clr)
+	pix[0] = uint8(clr)
+	pix[1] = uint8(clr >> 8)
 }
 
 func (i *RGB565) PixOffset(x, y int) int {

@@ -16,9 +16,9 @@ var RGB555Model = color.ModelFunc(
 
 		r, g, b, _ := c.RGBA()
 		return RGBColor{
-			uint8(r>>8) & mask5,
-			uint8(g>>8) & mask5,
-			uint8(b>>8) & mask5,
+			uint8(r >> (8 + (8 - 5))),
+			uint8(g >> (8 + (8 - 5))),
+			uint8(b >> (8 + (8 - 5))),
 		}
 	})
 

@@ -82,7 +82,7 @@ func (p PixelFormat) Type() int {
 		return PF_RGBA
 
 	case 2: // 16-bit color
-		if p.RedShift > p.BlueShift {
+		if p.RedShift < p.BlueShift {
 			if p.RedBits == 5 && p.GreenBits == 6 && p.BlueBits == 5 {
 				return PF_BGR_565
 			}

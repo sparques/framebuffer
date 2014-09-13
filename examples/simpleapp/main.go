@@ -6,12 +6,13 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/jteeuwen/framebuffer"
 	"image"
 	"image/draw"
 	_ "image/png"
 	"os"
 	"os/signal"
+
+	"github.com/samuel/framebuffer"
 )
 
 func main() {
@@ -37,7 +38,7 @@ func main() {
 	}
 
 	// Load the image we want to display.
-	buf := bytes.NewBuffer(gophercolor_png())
+	buf := bytes.NewReader(gophercolor_png())
 	img, _, err := image.Decode(buf)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Image decode: %v\n", err)

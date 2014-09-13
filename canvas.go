@@ -187,16 +187,20 @@ func Open(dm *DisplayMode) (c *Canvas, err error) {
 	}
 
 	// If we have a non-standard pixel format, we can't continue.
-	if c.orig_vi.nonstd != 0 {
-		err = errors.New("Canvas.Open: Framebuffer uses a non-standard pixel format. This is not supported.")
-		return
+	// if c.orig_vi.nonstd != 0 {
+	// 	err = errors.New("Canvas.Open: Framebuffer uses a non-standard pixel format. This is not supported.")
+	// 	return
+	// }
+
+	if c.orig_fi.smemlen == 0 {
+		c.orig_fi.smemlen = uint32(c.orig_vi.xres * c.orig_vi.yres * c.orig_vi.bits_per_pixel / 8)
 	}
 
 	// mmap the buffer's memory.
 	c.mem, err = syscall.Mmap(int(c.fd.Fd()), 0, int(c.orig_fi.smemlen),
 		syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_SHARED)
 	if err != nil {
-		err = errors.New("Canvas.Open: Mmap failed")
+		err = errors.New("Canvas.Open: Mmap failed: " + err.Error())
 		return
 	}
 
