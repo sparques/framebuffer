@@ -13,22 +13,22 @@ import (
 )
 
 var (
-	endmode       = []byte("endmode")
-	reg_label     = regexp.MustCompile(`^mode\W+"([^"]+)"`)
-	reg_geometry  = regexp.MustCompile(`geometry\W+(\d+)\W+(\d+)\W+(\d+)\W+(\d+)\W+(\d+)`)
-	reg_timings   = regexp.MustCompile(`timings\W+(\d+)\W+(\d+)\W+(\d+)\W+(\d+)\W+(\d+)\W+(\d+)\W+(\d+)`)
-	reg_hsync     = regexp.MustCompile(`hsync\W+high`)
-	reg_vsync     = regexp.MustCompile(`vsync\W+high`)
-	reg_csync     = regexp.MustCompile(`csync\W+high`)
-	reg_gsync     = regexp.MustCompile(`gsync\W+high`)
-	reg_accel     = regexp.MustCompile(`accel\W+true`)
-	reg_bcast     = regexp.MustCompile(`bcast\W+true`)
-	reg_grayscale = regexp.MustCompile(`grayscale\W+true`)
-	reg_extsync   = regexp.MustCompile(`extsync\W+true`)
-	reg_nonstd    = regexp.MustCompile(`nonstd\W+(\d+)`)
-	reg_laced     = regexp.MustCompile(`laced\W+true`)
-	reg_double    = regexp.MustCompile(`double\W+true`)
-	reg_format    = regexp.MustCompile(`rgba\W+(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+)`)
+	endmode      = []byte("endmode")
+	regLabel     = regexp.MustCompile(`^mode\W+"([^"]+)"`)
+	regGeometry  = regexp.MustCompile(`geometry\W+(\d+)\W+(\d+)\W+(\d+)\W+(\d+)\W+(\d+)`)
+	regTimings   = regexp.MustCompile(`timings\W+(\d+)\W+(\d+)\W+(\d+)\W+(\d+)\W+(\d+)\W+(\d+)\W+(\d+)`)
+	regHsync     = regexp.MustCompile(`hsync\W+high`)
+	regVsync     = regexp.MustCompile(`vsync\W+high`)
+	regCsync     = regexp.MustCompile(`csync\W+high`)
+	regGsync     = regexp.MustCompile(`gsync\W+high`)
+	regAccel     = regexp.MustCompile(`accel\W+true`)
+	regBcast     = regexp.MustCompile(`bcast\W+true`)
+	regGrayscale = regexp.MustCompile(`grayscale\W+true`)
+	regExtsync   = regexp.MustCompile(`extsync\W+true`)
+	regNonstd    = regexp.MustCompile(`nonstd\W+(\d+)`)
+	regLaced     = regexp.MustCompile(`laced\W+true`)
+	regDouble    = regexp.MustCompile(`double\W+true`)
+	regFormat    = regexp.MustCompile(`rgba\W+(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+)`)
 )
 
 func readInt(v []byte, bits int) int {
@@ -60,7 +60,7 @@ func readFBModes(r io.Reader) (list []*DisplayMode, err error) {
 			if err == io.EOF {
 				err = nil
 			}
-			return
+			break
 		}
 
 		line = bytes.TrimSpace(line)
@@ -69,88 +69,88 @@ func readFBModes(r io.Reader) (list []*DisplayMode, err error) {
 		}
 
 		// End of mode?
-		if bytes.Index(line, endmode) > -1 {
+		if bytes.Contains(line, endmode) {
 			list = append(list, dm)
 			dm = new(DisplayMode)
 			continue
 		}
 
 		// Parse name
-		matches := reg_label.FindSubmatch(line)
+		matches := regLabel.FindSubmatch(line)
 		if len(matches) > 1 {
 			dm.Name = string(matches[1])
 			continue
 		}
 
 		// Parse nonstd
-		matches = reg_nonstd.FindSubmatch(line)
+		matches = regNonstd.FindSubmatch(line)
 		if len(matches) > 1 {
 			dm.Nonstandard = readInt(matches[1], 32)
 			continue
 		}
 
 		// Parse hsync
-		if reg_hsync.Match(line) {
+		if regHsync.Match(line) {
 			dm.Sync |= SyncHorHighAct
 			continue
 		}
 
 		// Parse vsync
-		if reg_vsync.Match(line) {
+		if regVsync.Match(line) {
 			dm.Sync |= SyncVertHighAct
 			continue
 		}
 
 		// Parse csync
-		if reg_csync.Match(line) {
+		if regCsync.Match(line) {
 			dm.Sync |= SyncCompHighAct
 			continue
 		}
 
 		// Parse gsync
-		if reg_gsync.Match(line) {
+		if regGsync.Match(line) {
 			dm.Sync |= SyncOnGreen
 			continue
 		}
 
 		// Parse bcast
-		if reg_bcast.Match(line) {
+		if regBcast.Match(line) {
 			dm.Sync |= SyncBroadcast
 			continue
 		}
 
 		// Parse extsync
-		if reg_extsync.Match(line) {
+		if regExtsync.Match(line) {
 			dm.Sync |= SyncExt
 			continue
 		}
 
 		// Parse accel
-		if reg_accel.Match(line) {
+		if regAccel.Match(line) {
 			dm.Accelerated = true
 			continue
 		}
 
 		// Parse grayscale
-		if reg_grayscale.Match(line) {
+		if regGrayscale.Match(line) {
 			dm.Grayscale = true
 			continue
 		}
 
 		// Parse laced
-		if reg_laced.Match(line) {
+		if regLaced.Match(line) {
 			dm.VMode |= VModeInterlaced
 			continue
 		}
 
 		// Parse double
-		if reg_double.Match(line) {
+		if regDouble.Match(line) {
 			dm.VMode |= VModeDouble
 			continue
 		}
 
 		// Parse geometry
-		matches = reg_geometry.FindSubmatch(line)
+		matches = regGeometry.FindSubmatch(line)
 		if len(matches) > 1 {
 			dm.Geometry.XRes = readInt(matches[1], 32)
 			dm.Geometry.YRes = readInt(matches[2], 32)
@@ -160,7 +160,7 @@ func readFBModes(r io.Reader) (list []*DisplayMode, err error) {
 		}
 
 		// Parse timings
-		matches = reg_timings.FindSubmatch(line)
+		matches = regTimings.FindSubmatch(line)
 		if len(matches) > 1 {
 			dm.Timings.Pixclock = readInt(matches[1], 32)
 			dm.Timings.Left = readInt(matches[2], 32)
@@ -172,7 +172,7 @@ func readFBModes(r io.Reader) (list []*DisplayMode, err error) {
 		}
 
 		// Parse pixel format
-		matches = reg_format.FindSubmatch(line)
+		matches = regFormat.FindSubmatch(line)
 		if len(matches) > 1 {
 			dm.Format.RedBits = uint8(readInt(matches[1], 8))
 			dm.Format.RedShift = uint8(readInt(matches[1], 8))

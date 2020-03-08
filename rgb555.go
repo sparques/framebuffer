@@ -57,7 +57,7 @@ func (i *RGB555) SetRGB(x, y int, c RGBColor) {
 
 	n := i.PixOffset(x, y)
 	pix := i.Pix[n:]
-	clr := uint16(c.R<<10) | uint16(c.G<<5) | uint16(c.B)
+	clr := (uint16(c.R) << 10) | uint16(c.G<<5) | uint16(c.B)
 
 	pix[0] = uint8(clr)
 	pix[1] = uint8(clr >> 8)
