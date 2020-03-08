@@ -17,7 +17,7 @@ import (
 
 func main() {
 	// Create a new framebuffer canvas.
-	canvas, err := framebuffer.Open(nil)
+	canvas, err := framebuffer.Open(nil, nil)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Open: %v\n", err)
 		return

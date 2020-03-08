@@ -45,8 +45,8 @@ func (i *BGR555) SetRGB(x, y int, c RGBColor) {
 	pix := i.Pix[n:]
 	clr := uint16(c.B<<10) | uint16(c.G<<5) | uint16(c.R)
 
-	pix[0] = uint8(clr >> 8)
-	pix[1] = uint8(clr)
+	pix[0] = uint8(clr)
+	pix[1] = uint8(clr >> 8)
 }
 
 func (i *BGR555) PixOffset(x, y int) int {

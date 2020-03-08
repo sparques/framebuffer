@@ -77,9 +77,9 @@ type Canvas struct {
 // can damage the display. Refer to Canvas.Modes() and Canvas.FindMode()
 // for more information. Canvas.CurrentMode() can be used to see which
 // mode is actually being used.
-func Open(dm *DisplayMode) (c *Canvas, err error) {
+func Open(dm *DisplayMode, tty *os.File) (c *Canvas, err error) {
 	c = new(Canvas)
-	c.tty = os.Stdout
+	c.tty = tty
 	c.orig_vt_no = 0
 	c.switch_state = _FB_ACTIVE
 
@@ -90,16 +90,21 @@ func Open(dm *DisplayMode) (c *Canvas, err error) {
 		}
 	}()
 
-	// Get VT state
-	var vts vt_stat
-	err = ioctl(c.tty.Fd(), _VT_GETSTATE, unsafe.Pointer(&vts))
-	if err != nil {
-		return
-	}
-
 	// Determine which framebuffer to use.
 	c.dev = os.Getenv("FRAMEBUFFER")
 	if len(c.dev) == 0 {
+		if c.tty == nil {
+			err = errors.New("No tty provided. Must set FRAMEBUFFER")
+			return
+		}
+
+		// Get VT state
+		var vts vt_stat
+		err = ioctl(c.tty.Fd(), _VT_GETSTATE, unsafe.Pointer(&vts))
+		if err != nil {
+			return
+		}
+
 		var c2m fb_con2fbmap
 		var fd *os.File
 
@@ -156,16 +161,18 @@ func Open(dm *DisplayMode) (c *Canvas, err error) {
 		}
 	}
 
-	// Get KD mode
-	err = ioctl(c.tty.Fd(), _KDGETMODE, unsafe.Pointer(&c.orig_kd))
-	if err != nil {
-		return
-	}
+	if c.tty != nil {
+		// Get KD mode
+		err = ioctl(c.tty.Fd(), _KDGETMODE, unsafe.Pointer(&c.orig_kd))
+		if err != nil {
+			return
+		}
 
-	// Get original vt mode
-	err = ioctl(c.tty.Fd(), _VT_GETMODE, unsafe.Pointer(&c.orig_vt))
-	if err != nil {
-		return
+		// Get original vt mode
+		err = ioctl(c.tty.Fd(), _VT_GETMODE, unsafe.Pointer(&c.orig_vt))
+		if err != nil {
+			return
+		}
 	}
 
 	// Set display mode.
@@ -220,16 +227,18 @@ func Open(dm *DisplayMode) (c *Canvas, err error) {
 		}
 	}
 
-	// Switch terminal to graphics mode.
-	err = ioctl(c.tty.Fd(), _KDSETMODE, _KD_GRAPHICS)
-	if err != nil {
-		return
-	}
+	if c.tty != nil {
+		// Switch terminal to graphics mode.
+		err = ioctl(c.tty.Fd(), _KDSETMODE, _KD_GRAPHICS)
+		if err != nil {
+			return
+		}
 
-	// Activate the given tty.
-	err = c.activateCurrent(c.tty)
-	if err != nil {
-		return
+		// Activate the given tty.
+		err = c.activateCurrent(c.tty)
+		if err != nil {
+			return
+		}
 	}
 
 	// Clear screen
@@ -555,16 +564,24 @@ func (c *Canvas) SetPalette(pal color.Palette) error {
 }
 
 func (c *Canvas) switchAcquire() {
-	ioctl(c.tty.Fd(), _VT_RELDISP, _VT_ACKACQ)
+	if c.tty != nil {
+		ioctl(c.tty.Fd(), _VT_RELDISP, _VT_ACKACQ)
+	}
 	c.switch_state = _FB_ACTIVE
 }
 
 func (c *Canvas) switchRelease() {
-	ioctl(c.tty.Fd(), _VT_RELDISP, 1)
+	if c.tty != nil {
+		ioctl(c.tty.Fd(), _VT_RELDISP, 1)
+	}
 	c.switch_state = _FB_INACTIVE
 }
 
 func (c *Canvas) switchInit() error {
+	if c.tty == nil {
+		return nil
+	}
+
 	var vm vt_mode
 
 	vm.mode = _VT_PROCESS
