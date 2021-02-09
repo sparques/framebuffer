@@ -5,7 +5,7 @@ package framebuffer
 
 // <linux/vt.h>
 
-type vt_mode struct {
+type vtMode struct {
 	mode   int8  // vt mode
 	waitv  int8  // If set, hang on writes if not active.
 	relsig int16 // signal to raise on release req
@@ -13,10 +13,10 @@ type vt_mode struct {
 	frsig  int16 // unused (set to 0)
 }
 
-type vt_stat struct {
-	v_active uint16 // active vt
-	v_signal uint16 // signal to send
-	v_state  uint16 // vt bitmask
+type vtStat struct {
+	vActive uint16 // active vt
+	vSignal uint16 // signal to send
+	vState  uint16 // vt bitmask
 }
 
 const (
