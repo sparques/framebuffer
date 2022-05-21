@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	_ "image/png"
 	"os"
@@ -55,6 +56,15 @@ func main() {
 
 	draw.Draw(fb, imgb, img, image.ZP, draw.Src)
 
+	for x := 0; x < fb.Bounds().Dx(); x++ {
+		fb.Set(x, 0, color.White)
+		fb.Set(x, fb.Bounds().Dy()-1, color.White)
+	}
+	for y := 0; y < fb.Bounds().Dy(); y++ {
+		fb.Set(0, y, color.White)
+		fb.Set(fb.Bounds().Dx()-1, y, color.White)
+	}
+
 	wait() // Wait until an exit signal has been received.
 }
 
@@ -62,8 +72,5 @@ func main() {
 func wait() {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt, os.Kill)
-
-	for _ = range signals {
-		return
-	}
+	<-signals
 }

@@ -56,27 +56,27 @@ var (
 )
 
 func init() {
-	var c fb_cursor
-	var v fb_vblank
+	var c fbCursor
+	var v fbVblank
 
 	_IO_CURSOR = _IOWR('F', 0x08, int(unsafe.Sizeof(c)))
 	_IOGET_VBLANK = _IOR('F', 0x12, int(unsafe.Sizeof(v)))
 	_IO_WAITFORVSYNC = _IOW('F', 0x20, 4) // 4 = sizeof(uint32)
 }
 
-type fb_fix_screeninfo struct {
+type fbFixScreenInfo struct {
 	id           [16]byte  // Identification string (e.g.: "TT Builtin")
 	smemstart    uint64    // Physical start address of framebuffer memory.
 	smemlen      uint32    // Length of framebuffer memory.
 	typ          uint32    // See __TYPE_XXX values.
-	type_aux     uint32    // Interleave for interleaved planes.
+	typeAux      uint32    // Interleave for interleaved planes.
 	visual       uint32    // See __VISUAL_XXX values.
 	xpanstep     uint16    // Zero if no hardware panning.
 	ypanstep     uint16    // Zero if no hardware panning.
 	ywrapstep    uint16    // Zero if no hardware ywrap.
-	line_length  uint32    // Length of a line in bytes.
-	mmio_start   uint64    // Physical start address of mmap'd _IO.
-	mmio_len     uint32    // Length of mmap'd _IO.
+	lineLength   uint32    // Length of a line in bytes.
+	mmioStart    uint64    // Physical start address of mmap'd _IO.
+	mmioLen      uint32    // Length of mmap'd _IO.
 	accel        uint32    // Indicate to driver which specific chip/card we have.
 	capabilities uint16    // See _CAP_XXXX values.
 	_            [2]uint16 // Reserved for future use.
@@ -91,57 +91,57 @@ type fb_fix_screeninfo struct {
 // components. Offset specifies the position of the least significant bit
 // of the pallette index in a pixel value. Length indicates the number
 // of available palette entries (i.e. # of entries = 1 << length).
-type fb_bitfield struct {
+type fbBitField struct {
 	offset    uint32 // beginning of bitfield
 	length    uint32 // length of bitfield
 	msb_right uint32 // != 0 : Most significant bit is right
 }
 
-type fb_var_screeninfo struct {
-	xres           uint32 // Visible resolution.
-	yres           uint32
-	xres_virtual   uint32 // Virtual resolution (viewport).
-	yres_virtual   uint32
-	xoffset        uint32 // Offset from virtual to visible resolution.
-	yoffset        uint32
-	bits_per_pixel uint32      // Bit depth.
-	grayscale      uint32      // 0 = color, 1 = grayscale, >1 = FOURCC
-	red            fb_bitfield // bitfield in FB mem, if true colour. Else only length is significant.
-	green          fb_bitfield
-	blue           fb_bitfield
-	transparent    fb_bitfield
-	nonstd         uint32 // non-zero = non-standard pixel format.
-	activate       uint32 // See __ACTIVATE_XXXX values.
-	height         uint32 // Height of picture in millimetres.
-	width          uint32 // Width of picture in millimetres.
-	_              uint32 // AccelFlags: obsolete
+type fbVarScreenInfo struct {
+	xres         uint32 // Visible resolution.
+	yres         uint32
+	xresVirtual  uint32 // Virtual resolution (viewport).
+	yresVirtual  uint32
+	xoffset      uint32 // Offset from virtual to visible resolution.
+	yoffset      uint32
+	bitsPerPixel uint32     // Bit depth.
+	grayscale    uint32     // 0 = color, 1 = grayscale, >1 = FOURCC
+	red          fbBitField // bitfield in FB mem, if true colour. Else only length is significant.
+	green        fbBitField
+	blue         fbBitField
+	transparent  fbBitField
+	nonstd       uint32 // non-zero = non-standard pixel format.
+	activate     uint32 // See __ACTIVATE_XXXX values.
+	height       uint32 // Height of picture in millimetres.
+	width        uint32 // Width of picture in millimetres.
+	_            uint32 // AccelFlags: obsolete
 
 	// Timing: All values in pixclocks, except pixclock.
 	// Do not change these unless you really know what you are doing.
-	pixclock     uint32 // Pixel clock in picoseconds.
-	left_margin  uint32 // Time from sync to picture.
-	right_margin uint32 // Time from picture to sync.
-	upper_margin uint32 // Time from sync to picture.
-	lower_margin uint32
-	hsync_len    uint32    // Length of horizontal sync.
-	vsync_len    uint32    // Length of vertical sync.
-	sync         uint32    // See _SYNC_XXXX values.
-	vmode        uint32    // See _VMODE_XXXX values.
-	rotate       uint32    // Angle of counter-clockwise rotation.
-	colorspace   uint32    // Colorspace for FOURCC-based modes.
-	_            [4]uint32 // Reserved for future use.
+	pixclock    uint32 // Pixel clock in picoseconds.
+	leftMargin  uint32 // Time from sync to picture.
+	rightMargin uint32 // Time from picture to sync.
+	upperMargin uint32 // Time from sync to picture.
+	lowerMargin uint32
+	hsyncLen    uint32    // Length of horizontal sync.
+	vsyncLen    uint32    // Length of vertical sync.
+	sync        uint32    // See _SYNC_XXXX values.
+	vmode       uint32    // See _VMODE_XXXX values.
+	rotate      uint32    // Angle of counter-clockwise rotation.
+	colorspace  uint32    // Colorspace for FOURCC-based modes.
+	_           [4]uint32 // Reserved for future use.
 }
 
 // Copy returns a copy of the current object.
-func (v *fb_var_screeninfo) Copy() *fb_var_screeninfo {
-	n := new(fb_var_screeninfo)
+func (v *fbVarScreenInfo) Copy() *fbVarScreenInfo {
+	n := new(fbVarScreenInfo)
 	n.xres = v.xres
 	n.yres = v.yres
-	n.xres_virtual = v.xres_virtual
-	n.yres_virtual = v.yres_virtual
+	n.xresVirtual = v.xresVirtual
+	n.yresVirtual = v.yresVirtual
 	n.xoffset = v.xoffset
 	n.yoffset = v.yoffset
-	n.bits_per_pixel = v.bits_per_pixel
+	n.bitsPerPixel = v.bitsPerPixel
 	n.grayscale = v.grayscale
 	n.red = v.red
 	n.green = v.green
@@ -152,12 +152,12 @@ func (v *fb_var_screeninfo) Copy() *fb_var_screeninfo {
 	n.height = v.height
 	n.width = v.width
 	n.pixclock = v.pixclock
-	n.left_margin = v.left_margin
-	n.right_margin = v.right_margin
-	n.upper_margin = v.upper_margin
-	n.lower_margin = v.lower_margin
-	n.hsync_len = v.hsync_len
-	n.vsync_len = v.vsync_len
+	n.leftMargin = v.leftMargin
+	n.rightMargin = v.rightMargin
+	n.upperMargin = v.upperMargin
+	n.lowerMargin = v.lowerMargin
+	n.hsyncLen = v.hsyncLen
+	n.vsyncLen = v.vsyncLen
 	n.sync = v.sync
 	n.vmode = v.vmode
 	n.rotate = v.rotate
@@ -179,7 +179,7 @@ type fb_con2fbmap struct {
 	framebuffer uint32
 }
 
-type fb_vblank struct {
+type fbVblank struct {
 	flags  uint32    // vblank flags.
 	count  uint32    // Counter of retraces since boot.
 	vcount uint32    // Current scanline position.
@@ -187,7 +187,7 @@ type fb_vblank struct {
 	_      [4]uint32 // Reserved for future use.
 }
 
-type fb_copyarea struct {
+type fbCopyArea struct {
 	dx     uint32
 	dy     uint32
 	width  uint32
@@ -196,29 +196,29 @@ type fb_copyarea struct {
 	sy     uint32
 }
 
-type fb_image struct {
-	dx       uint32 // Where to place image
-	dy       uint32
-	width    uint32 // Size of image
-	height   uint32
-	fg_color uint32 // Only used when a mono bitmap
-	bg_color uint32
-	depth    uint8          // Depth of the image
-	data     unsafe.Pointer // const char* -- Pointer to image data
-	cmap     fb_cmap        // color map info
+type fbImage struct {
+	dx      uint32 // Where to place image
+	dy      uint32
+	width   uint32 // Size of image
+	height  uint32
+	fgColor uint32 // Only used when a mono bitmap
+	bgColor uint32
+	depth   uint8          // Depth of the image
+	data    unsafe.Pointer // const char* -- Pointer to image data
+	cmap    fb_cmap        // color map info
 }
 
 type fbcurpos struct {
 	x, y uint16
 }
 
-type fb_cursor struct {
+type fbCursor struct {
 	set    uint16         // what to set
 	enable uint16         // cursor on/off
 	rop    uint16         // bitop operation
 	mask   unsafe.Pointer // const char* -- cursor mask bits
 	hot    fbcurpos       // cursor hot spot
-	image  fb_image       // Cursor image
+	image  fbImage        // Cursor image
 }
 
 const (

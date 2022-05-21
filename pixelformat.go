@@ -3,8 +3,6 @@
 
 package framebuffer
 
-import "math"
-
 // List of known image/pixel formats.
 const (
 	PF_UNKNOWN = iota
@@ -68,7 +66,7 @@ type PixelFormat struct {
 
 // Stride returns the width, in bytes, for a single pixel.
 func (p PixelFormat) Stride() int {
-	return int(math.Ceil(float64(p.Depth) / 8))
+  return (p.Depth + 7) / 8
 }
 
 // Type returns an integer constant from the PF_XXX list, which
