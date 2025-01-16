@@ -457,7 +457,7 @@ func (c *Canvas) CurrentMode() (*DisplayMode, error) {
 	dm.VMode = int(v.vmode)
 
 	var pf PixelFormat
-	pf.Depth = uint8(v.bits_per_pixel)
+	pf.Depth = uint8(v.bitsPerPixel)
 	pf.RedBits = uint8(v.red.length)
 	pf.RedShift = uint8(v.red.offset)
 	pf.GreenBits = uint8(v.green.length)

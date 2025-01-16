@@ -13,7 +13,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/samuel/framebuffer"
+	"github.com/sparques/framebuffer"
 )
 
 func main() {
